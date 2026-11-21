@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database (optional - uncomment to use instead of SQLite)
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: asat-db
+  #   environment:
+  #     POSTGRES_USER: asat
+  #     POSTGRES_PASSWORD: asat_password
+  #     POSTGRES_DB: asat_db
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U asat -d asat_db"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: asat-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./asat.db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-in-production}
+      - DEBUG=false
+    volumes:
+      - ./uploads:/app/uploads
+      - ./reports:/app/reports
+      - ./frontend:/app/frontend
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    restart: unless-stopped
+
+# volumes:
+#   postgres_data:
